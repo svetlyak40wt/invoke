@@ -30,7 +30,8 @@ class Executor(object):
         """
         self.collection = collection
         if config is None:
-            config = Config()      
+            config = Config()
+        debug("Executor config final: {0!r}".format(config.config.defaults.data))
         self.config = config
 
     def execute(self, *tasks, **kwargs):
@@ -140,6 +141,7 @@ class Executor(object):
         # pass a dotted path to Collection.configuration()
         debug("Executing %r%s" % (task, (" as %s" % name) if name else ""))
         if task.contextualized:
+            debug("config.load, collection=%r" % self.collection.configuration(name))
             config.load(collection=self.collection.configuration(name))
             context = Context(config=config)
             args = (context,) + args

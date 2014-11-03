@@ -216,6 +216,11 @@ bar
             c = Collection(mytask)
             c.configure({'my_key': 'value'})
             Executor(collection=c).execute('mytask')
+            # TODO: figure out how best to have 'pure' Executor objs still
+            # obtain a useful dedupe option :( :( Feels like probably suck it
+            # up, do "if not found in config, assume False"?
+            # Alterantive is to wrap all Executor calls in here which feels
+            # pretty stupid.
 
         def hands_task_specific_configuration_to_context(self):
             @ctask

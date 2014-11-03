@@ -457,8 +457,13 @@ class Config(DataProxy):
             collection = {}
         # NOTE: can't use etc.AdapterSet.appendleft here, it is buggy, no time
         # to fix right now. Just insert at position 1 after the Defaults we
-        # already know is there.
-        self.config.adapters.insert(1, Basic(collection))
+        # already know is there (or replace if already exists and we were
+        # given data - means load() # was called >1 time)
+        if isinstance(self.config.adapters[1], Basic):
+            if collection is not None:
+                self.config.adapters[1] = Basic(collection)
+        else:
+            self.config.adapters.insert(1, Basic(collection))
         # Now that we have all other sources defined, we can load the Env
         # adapter. This sadly requires a 'pre-load' call to .load() so config
         # files get slurped up.
@@ -467,7 +472,14 @@ class Config(DataProxy):
         # Must break encapsulation a tiny bit here to ensure env vars come
         # before runtime config files in the hierarchy. It's the least bad way
         # right now given etc.Config's api.
-        self.config.adapters.insert(len(self.config.adapters) - 2, env)
+        print "before env insert: %r" % self.config.adapters
+        if isinstance(self.config.adapters[-2], NestedEnv):
+            print "replacing"
+            self.config.adapters[-2] = env
+        else:
+            print "inserting"
+            self.config.adapters.insert(len(self.config.adapters) - 2, env)
+        print "after env insert: %r" % self.config.adapters
         # Re-load() so that our values get applied in the right slot in the
         # hierarchy.
         self.config.load()
